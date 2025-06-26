@@ -1,0 +1,6 @@
+sudo tcpdump -i eth0
+ping -c 4 google.com
+ifconfig
+netstat –tulnp
+nslookup openai.com
+traceroute openai.com
