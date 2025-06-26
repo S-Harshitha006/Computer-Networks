@@ -1,0 +1,51 @@
+EchoServer
+import java.io.*;
+import java.net.*;
+public class Echoserver {
+    public static void main(String[] args) {
+        try {
+            ServerSocket serverSocket = new ServerSocket(1234);
+            System.out.println("Server started. Waiting for client...");
+            Socket socket = serverSocket.accept();
+            System.out.println("Client connected.");
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            String msg;
+            while ((msg = in.readLine()) != null) {
+                System.out.println("Received from client: " + msg);
+                out.println("Echo: " + msg);
+                if (msg.equalsIgnoreCase("bye")) break;
+            }
+            socket.close();
+            serverSocket.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+EchoClient
+import java.io.*;
+import java.net.*;
+public class Echoclient {
+    public static void main(String[] args) {
+        try {
+            Socket socket = new Socket("localhost", 1234);
+            System.out.println("Connected to server.");
+            BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            String msg;
+            while (true) {
+                System.out.print("Enter message: ");
+                msg = userInput.readLine();
+                out.println(msg);
+                String response = in.readLine();
+                System.out.println("From server: " + response);
+                if (msg.equalsIgnoreCase("bye")) break;
+            }
+            socket.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
