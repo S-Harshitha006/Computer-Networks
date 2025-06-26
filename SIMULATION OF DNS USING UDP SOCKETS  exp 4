@@ -1,0 +1,52 @@
+DNSServer:
+import java.net.*;
+public class DNSServer {
+    private static int indexOf(String[] arr, String key) {
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i].equals(key.trim())) return i;
+        }
+        return -1;
+    }
+    public static void main(String[] args) throws Exception {
+        String[] names = {"www.aptitudeguru.com", "www.downloadcyclone.blogspot.com"};
+        String[] ips = {"165.165.80.80", "165.165.79.1"};
+        DatagramSocket server = new DatagramSocket(1309);
+        System.out.println("DNS Server running on port 1309...");
+        byte[] recvBuf = new byte[1024];
+        byte[] sendBuf;
+        while (true) {
+            DatagramPacket recvPacket = new DatagramPacket(recvBuf, recvBuf.length);
+            server.receive(recvPacket);
+            String query = new String(recvPacket.getData(), 0, recvPacket.getLength());
+            System.out.println("Query received for: " + query);
+            InetAddress clientAddr = recvPacket.getAddress();
+            int clientPort = recvPacket.getPort();
+            int idx = indexOf(names, query);
+            String response = (idx != -1) ? ips[idx] : "NOT_FOUND";
+            sendBuf = response.getBytes();
+            DatagramPacket sendPacket = new DatagramPacket(sendBuf, sendBuf.length, clientAddr, clientPort);
+            server.send(sendPacket);
+        }
+    }
+}
+DNSClient:
+import java.net.*;
+import java.io.*;
+public class DNSClient {
+    public static void main(String[] args) throws Exception {
+        DatagramSocket client = new DatagramSocket();
+        InetAddress serverAddr = InetAddress.getByName("127.0.0.1");
+        BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+        System.out.print("Enter server/domain name: ");
+        String name = stdin.readLine();
+        byte[] sendBuf = name.getBytes();
+        DatagramPacket sendPacket = new DatagramPacket(sendBuf, sendBuf.length, serverAddr, 1309);
+        client.send(sendPacket);
+        byte[] recvBuf = new byte[1024];
+        DatagramPacket recvPacket = new DatagramPacket(recvBuf, recvBuf.length);
+        client.receive(recvPacket);
+        String ip = new String(recvPacket.getData(), 0, recvPacket.getLength());
+        System.out.println("IP address is: " + ip.trim());
+        client.close();
+    }
+}
